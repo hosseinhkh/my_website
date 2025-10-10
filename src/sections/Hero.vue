@@ -1,20 +1,28 @@
 <template>
-  <div id="list-item-1">
+  <div id="home">
     <div class="hero-heading-area heading1">
-      <h5 data-aos="fade-left" data-aos-duration="800">
-        <img :src="subLogo" alt="" />Hi, I’m Alex, UI/UX Designer
+      <!-- Typing effect line -->
+      <h5 data-aos="fade-left" data-aos-duration="800" class="typing-line">
+        <img :src="subLogo" alt="" />
+        <span ref="typingText"></span>
+        <span class="cursor">|</span>
       </h5>
+
       <div class="space24" />
-      <h1 data-aos="fade-left" data-aos-duration="900">Designing Intuitive</h1>
+      <h1 data-aos="fade-left" data-aos-duration="900">Building Trustworthy</h1>
+
       <div class="space24" />
       <h1 class="head" data-aos="fade-left" data-aos-duration="1000">
-        Experiences <span>Inspire</span>
+        <span>LLMs</span> & <span>VLMs</span>
       </h1>
+
+
       <div class="space24" />
       <p data-aos="fade-left" data-aos-duration="1100">
-        Your gateway to innovative design, seamless user experiences, and impactful solutions.
-        Turning complex ideas into user-friendly designs.
+        Amazon AI Fellow · UCLA Ph.D. Candidate — crafting intelligent systems that think, see, and defend themselves.
+        My work bridges LLM reasoning and VLM perception with adversarial robustness, privacy, and speed.
       </p>
+
       <div class="arrow" data-aos="fade-left" data-aos-duration="1200">
         <a href="#">
           <img :src="elements1" alt="" class="elements1 keyframe5" />
@@ -24,17 +32,18 @@
         <div class="images">
           <img :src="others1" alt="" />
           <p>
-            2k+ reviews <br />
-            (4.90 of 5)
+            10+ Publications · 2× Gold Medals <br />
+            Former CTO · 15+ Years in Programming
           </p>
         </div>
       </div>
+
       <div class="space32" />
       <div class="main-btn-area" data-aos="fade-up" data-aos-duration="1200">
-        <a href="#"
-          >Lets Work Together
+        <a href="#about">
+          Discover More
           <span class="icon">
-            <Icon icon="fa6-solid:arrow-right" />
+            <Icon icon="fa6-solid:arrow-left" />
           </span>
         </a>
       </div>
@@ -48,4 +57,35 @@ import elements1 from '@/assets/img/elements/elements1.png'
 import arrow1 from '@/assets/img/icons/arrow1.svg'
 import others1 from '@/assets/img/all-images/others/others1.png'
 import { Icon } from '@iconify/vue'
+import { onMounted, ref } from 'vue'
+
+const typingText = ref<HTMLElement | null>(null)
+const text = "Hi, I’m Hossein — AI Security Researcher"
+let i = 0
+
+onMounted(() => {
+  const el = typingText.value
+  if (!el) return
+  const interval = setInterval(() => {
+    el.textContent = text.slice(0, i)
+    i++
+    if (i > text.length) clearInterval(interval)
+  }, 60) // typing speed in ms per character
+})
 </script>
+
+<style scoped>
+/* blinking cursor */
+.cursor {
+  display: inline-block;
+  margin-left: 3px;
+  animation: blink 0.8s steps(1) infinite;
+  color: #00e6c3; /* accent color */
+  font-weight: bold;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+</style>

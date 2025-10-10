@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="module" src="/@id/virtual:vue-devtools-path:overlay.js"></script>
+  <script type="module" src="/@id/virtual:vue-inspector-path:load.js"></script>
+
+  <script type="module" src="/@vite/client"></script>
+
+  <meta charset="UTF-8">
+  <link rel="icon" href="/src/assets/img/logo/fav-logo1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovro - Personal Portfolio Template</title>
+</head>
+<body class="body1">
+<div id="app"></div>
+<script type="module" src="/src/main.ts?t=1759974266982"></script>
+</body>
+</html>

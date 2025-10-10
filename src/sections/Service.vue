@@ -1,5 +1,5 @@
 <template>
-  <div id="list-item-3">
+  <div id="research">
     <div class="service-section-area">
       <BContainer>
         <BRow>
@@ -7,13 +7,11 @@
             <div class="service-header heading1">
               <h5 data-aos="fade-left" data-aos-duration="800">
                 <img :src="subLogo" alt="" />
-                My Services
+                How I Build
               </h5>
               <div class="space24" />
-              <h2 data-aos="fade-left" data-aos-duration="1000">Elevating Brands</h2>
-              <div class="space24" />
               <h2 class="head" data-aos="fade-left" data-aos-duration="1100">
-                Intuitive <span>Design</span>
+                Turning <span>Imagination</span> Into Reality
               </h2>
               <div class="space50" />
 
@@ -44,26 +42,27 @@ type ServiceType = {
   description: string
 }
 
+/* Same structure; copy only reframed as mindset/process */
 const services: ServiceType[] = [
   {
-    title: 'UI/UX Design',
+    title: 'Think Deep, Build Simple',
     description:
-      'Designing intuitive, user-focused interfaces that prioritize functionality and seamless navigation.',
+      'Start from messy problems, ship clean systems. If a defense needs a manual, it isn’t finished.',
   },
   {
-    title: 'User Research & Prototyping',
+    title: 'Secure by Curiosity',
     description:
-      'Conducting in-depth user research and creating interactive prototypes to validate ideas and refine designs.',
+      'I test like an attacker, not a user. Break it, learn, harden; repeat until it holds under pressure.',
   },
   {
-    title: 'Responsive Web Design',
+    title: 'Lead, Don’t Manage',
     description:
-      'Crafting designs that adapt seamlessly across all devices, ensuring a consistent user experience.',
+      'I’ve built and led product & research teams. Everyone ships, everyone learns. Velocity with standards.',
   },
   {
-    title: 'Wireframing & Visual Design',
+    title: 'Code Is My Canvas',
     description:
-      'Creating detailed wireframes and visually stunning designs to bring ideas into focus.',
+      'From PyTorch and CUDA to backend and UI, I think in code. Fast prototypes → polished, reproducible systems.',
   },
 ]
 </script>

@@ -21,17 +21,11 @@
                     </span>
                   </label>
                 </div>
-                <RouterLink :to="buttonLink" class="vl-btn1">
+                <a :href="buttonLink" class="vl-btn1">
                   {{ buttonLabel }}
                   <span><img :src="buttonIcon" alt="" /></span>
-                </RouterLink>
-                <button
-                  v-if="sideBarToggler"
-                  class="hamburger_menu"
-                  @click="() => (showSideBar = !showSideBar)"
-                >
-                  <img :src="barIcon" alt="" />
-                </button>
+                </a>
+
               </div>
             </div>
           </BCol>
@@ -40,7 +34,6 @@
     </div>
   </header>
 
-  <SideBar v-model:show="showSideBar" />
 </template>
 
 <script setup lang="ts">
@@ -49,7 +42,6 @@ import mailIcon from '@/assets/img/icons/mail1.svg'
 import { useLayoutStore } from '@/stores/layout'
 import { breakpointsBootstrapV5, useBreakpoints } from '@vueuse/core'
 import LogoBox from '@/components/LogoBox.vue'
-import SideBar from '@/components/SideBar.vue'
 import { onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
@@ -65,7 +57,7 @@ type PropsType = {
 
 const props = withDefaults(defineProps<PropsType>(), {
   buttonLabel: 'HIRE ME',
-  buttonLink: '/',
+  buttonLink: 'mailto:hkhalili@ucla.edu', // ✅ opens user's default mail app
   buttonIcon: mailIcon,
   showSideBarToggler: true,
   showThemeToggler: true,

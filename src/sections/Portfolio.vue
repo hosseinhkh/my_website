@@ -1,94 +1,95 @@
 <template>
-  <div id="list-item-5">
-    <div class="portfolio-section-area">
+  <div id="projects">
+    <div class="testimonial-section-area">
       <BContainer>
         <BRow>
           <BCol lg="12">
-            <div class="portfolio-header heading1">
-              <h5 data-aos="fade-left" data-aos-duration="800">
-                <img :src="subLogo" alt="" />
-                My Portfolio
+            <div class="testimonial-header heading1">
+              <h5 data-aos="fade-left" data-aos-duration="900">
+                <img :src="subLogo" alt="" />My Portfolio
               </h5>
               <div class="space24" />
-              <h2 data-aos="fade-left" data-aos-duration="1000">Innovation Designs</h2>
-              <div class="space24" />
-              <h2 class="head" data-aos="fade-left" data-aos-duration="1100">
-                Real <span>Results</span>
+              <h2 data-aos="fade-left" data-aos-duration="1000">
+                From <span>Labs</span> to <span>Life</span>
               </h2>
             </div>
-          </BCol>
-          <div class="space50" />
-          <BCol lg="12" data-aos="fade-left" data-aos-duration="1000">
-            <div class="portfolio-boxarea click-here">
-              <div class="img1">
-                <a href="javascript:void(0)" @click="openModal">
-                  <img :src="portfolio1" alt="" />
-                </a>
-              </div>
-              <div class="space24" />
-              <a href="javascript:void(0)" @click="openModal"
-                >Reelup - E commercer Video Platform</a
-              >
-            </div>
+            <div class="space60" />
           </BCol>
 
-          <BCol lg="6" md="6" data-aos="fade-left" data-aos-duration="1100">
-            <div class="portfolio-boxarea2 click-here">
-              <div class="img1">
-                <a href="javascript:void(0)" @click="openModal">
-                  <img :src="portfolio3" alt="" />
-                </a>
-              </div>
-              <div class="space24" />
-              <a href="javascript:void(0)" @click="openModal">Academy - Sales Career</a>
-            </div>
-          </BCol>
 
-          <BCol lg="6" md="6" data-aos="fade-left" data-aos-duration="1200">
-            <div class="portfolio-boxarea2 click-here">
-              <div class="img1">
-                <a href="javascript:void(0)" @click="openModal">
-                  <img :src="portfolio4" alt="" />
-                </a>
+          <!-- Alternating big/small layout: 7/5/5/7 repeat -->
+          <template v-for="(p, i) in projects" :key="p.id">
+            <BCol
+              :lg="isLarge(i) ? 7 : 5"
+              md="6"
+              data-aos="zoom-in"
+              :data-aos-duration="900 + i * 100"
+            >
+              <div class="testimonial-boxarea">
+                <h4 class="proj-title">{{ p.title }}</h4>
+                <div class="space20" />
+                <p class="proj-summary">{{ p.summary }}</p>
               </div>
-              <div class="space24" />
-              <a href="javascript:void(0)" @click="openModal">Leadlogic- Dashboard Design</a>
-            </div>
-          </BCol>
-
-          <BCol lg="12" data-aos="fade-left" data-aos-duration="1100">
-            <div class="portfolio-boxarea click-here">
-              <div class="img1">
-                <a href="javascript:void(0)" @click="openModal">
-                  <img :src="portfolio2" alt="" />
-                </a>
-              </div>
-              <div class="space24" />
-              <a href="javascript:void(0)" @click="openModal"
-                >Reelup - E commercer Video Platform</a
-              >
-            </div>
-          </BCol>
+            </BCol>
+          </template>
         </BRow>
       </BContainer>
     </div>
   </div>
-
-  <ContactModal v-model="showModal" />
 </template>
 
 <script setup lang="ts">
 import subLogo from '@/assets/img/icons/sublogo1.svg'
-
-import portfolio1 from '@/assets/img/all-images/portfolio/portfolio-img1.png'
-import portfolio2 from '@/assets/img/all-images/portfolio/portfolio-img2.png'
-import portfolio3 from '@/assets/img/all-images/portfolio/portfolio-img3.png'
-import portfolio4 from '@/assets/img/all-images/portfolio/portfolio-img4.png'
-import ContactModal from '@/components/ContactModal.vue'
-import { ref } from 'vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 
-const showModal = ref<boolean>(false)
+type Project = { id: string; title: string; summary: string }
 
-const openModal = () => (showModal.value = true)
+const projects: Project[] = [
+  {
+    id: 'llm-privacy-filter',
+    title: 'LLM Privacy Filter (Tokenizer-Level Redaction)',
+    summary:
+      'Tokenizer-aware masking and coreference repair for prompts/outputs. High-recall privacy with low hallucination and real-time latency.',
+  },
+  {
+    id: 'vlm-robustness-benchmark',
+    title: 'VLM Robustness Benchmark (Vision–Language Attacks)',
+    summary:
+      'Patch, noise, and physical attack evaluation for VLMs. Quantifies grounding drift and instruction following under stress.',
+  },
+  {
+    id: 'rt-purification-edge',
+    title: 'Real-Time Purification on Edge',
+    summary:
+      'Lightweight purification that removes adversarial artifacts while preserving accuracy. Optimized for Jetson-class devices.',
+  },
+  {
+    id: 'genai-purification',
+    title: 'Generative AI for Defense (Diffusion-Based Purification)',
+    summary:
+      'Diffusion priors cleanse adversarial noise without over-smoothing semantics. Ablation-driven balance of robustness and fidelity.',
+  },
+  {
+    id: 'robotic-perception',
+    title: 'Robotics Perception Stack (VLM + CV)',
+    summary:
+      'Multimodal perception for robots—scene understanding, grounding, and instruction following by fusing VLM features with classic CV.',
+  },
+  {
+    id: 'skynet-vlm-robotics',
+    title: 'SKYNET',
+    summary:
+      'Developed a perception and reasoning stack for embodied robots using VLMs, enabling robust understanding under adversarial and real-world noise.',
+  },
+
+]
+
+// 7/5/5/7 repeating pattern
+const isLarge = (i: number) => i % 4 === 0 || i % 4 === 3
 </script>
+
+<style scoped>
+/* Keep your theme’s testimonial styles; just a tiny tweak for titles */
+.proj-title { font-size: 20px; font-weight: 600; color: #fff; }
+.proj-summary { color: rgba(255,255,255,.86); line-height: 1.6; }
+</style>

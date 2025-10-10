@@ -28,8 +28,6 @@
             <div class="space30" />
             <Portfolio />
             <div class="space30" />
-            <Testimonials />
-            <div class="space30" />
             <Blogs />
             <div class="space60" />
             <Contact />
