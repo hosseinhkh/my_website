@@ -4,19 +4,20 @@
   <div class="mcursor-dot" ref="dot"></div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 
-const ring = ref(null)
-const dot  = ref(null)
+const ring = ref<HTMLDivElement | null>(null)
+const dot  = ref<HTMLDivElement  | null>(null)
 
-let x = 0, y = 0, rx = 0, ry = 0, raf
+let x = 0, y = 0, rx = -9999, ry = -9999
+let raf: number | null = null
 
-const move = e => {
+const move = (e: MouseEvent) => {
   x = e.clientX
   y = e.clientY
-  // grow on interactive elements
-  const t = e.target
+
+  const t = e.target as HTMLElement | null
   const interactive = t?.closest('a,button,[role="button"],.btn,.nav-link')
   ring.value?.classList.toggle('is-active', !!interactive)
 }
@@ -25,27 +26,36 @@ const animate = () => {
   // lerp to make it smooth
   rx += (x - rx) * 0.15
   ry += (y - ry) * 0.15
-  ring.value.style.transform = `translate3d(${rx}px,${ry}px,0)`
-  dot.value.style.transform  = `translate3d(${x}px,${y}px,0)`
+
+  if (ring.value) ring.value.style.transform = `translate3d(${rx}px,${ry}px,0)`
+  if (dot.value)  dot.value.style.transform  = `translate3d(${x}px,${y}px,0)`
+
   raf = requestAnimationFrame(animate)
 }
 
 onMounted(() => {
+  if (typeof window === 'undefined') return
   // don’t show on touch devices
   if (matchMedia('(pointer: coarse)').matches) return
+
   document.addEventListener('mousemove', move, { passive: true })
   raf = requestAnimationFrame(animate)
-  // hide when leaving window
-  document.addEventListener('mouseleave', () => {
-    ring.value.style.opacity = '0'; dot.value.style.opacity = '0'
-  })
-  document.addEventListener('mouseenter', () => {
-    ring.value.style.opacity = '1'; dot.value.style.opacity = '1'
-  })
+
+  const hide = () => {
+    if (ring.value) ring.value.style.opacity = '0'
+    if (dot.value)  dot.value.style.opacity  = '0'
+  }
+  const show = () => {
+    if (ring.value) ring.value.style.opacity = '1'
+    if (dot.value)  dot.value.style.opacity  = '1'
+  }
+
+  document.addEventListener('mouseleave', hide)
+  document.addEventListener('mouseenter', show)
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(raf)
+  if (raf !== null) cancelAnimationFrame(raf)
   document.removeEventListener('mousemove', move)
 })
 </script>
