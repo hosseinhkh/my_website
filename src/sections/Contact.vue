@@ -12,7 +12,7 @@
               <h2 data-aos="fade-left" data-aos-duration="1000">Have Any Project in</h2>
               <div class="space24" />
               <h2 class="head" data-aos="fade-left" data-aos-duration="1100">
-                Mind, <span>Lets Talk</span>
+                Mind, <span>Let’s Talk</span>
               </h2>
             </div>
 

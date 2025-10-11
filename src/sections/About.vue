@@ -8,7 +8,7 @@
         <div class="space24" />
         <h1 data-aos="fade-left" data-aos-duration="1000">AI under attack?</h1>
         <h1 class="head" data-aos="fade-left" data-aos-duration="1100">
-          Not on <span>my watch</span>
+          Not under <span>my watch</span>
         </h1>
       </div>
 
