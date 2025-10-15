@@ -1,11 +1,18 @@
 <template>
   <NavBar />
 
-  <!-- Fallback class toggles ONLY when we decide to hide video -->
-  <div class="main-hero-area5 parallaxie" :class="{ 'no-video': fallback }">
-    <video ref="bgVideo" class="body-overlay" muted autoplay loop>
-      <source src="/video5.mp4" type="video/mp4" />
-    </video>
+  <!-- Add 'no-video' only when we decide to disable video -->
+  <div class="main-hero-area5 parallaxie" :class="{ 'no-video': disableVideo }">
+    <!-- If disabled, this node never renders => no request to /video5.mp4 -->
+    <video
+      v-if="!disableVideo"
+      class="body-overlay"
+      autoplay
+      muted
+      loop
+      preload="auto"
+      :src="videoSrc"
+    ></video>
 
     <BContainer>
       <BRow>
@@ -40,9 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-
+import { ref } from 'vue'
+import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 import NavBar from '@/components/NavBar.vue'
 import ContactBox from '@/sections/ContactBox.vue'
 import Hero from '@/sections/Hero.vue'
@@ -53,79 +59,56 @@ import Portfolio from '@/sections/Portfolio.vue'
 import Blogs from '@/sections/Blogs.vue'
 import Contact from '@/sections/Contact.vue'
 import BackToTop from '@/components/BackToTop.vue'
-import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 
-const route = useRoute()
-const bgVideo = ref<HTMLVideoElement | null>(null)
-const fallback = ref(false)
+/** ---- Compute once, before first render ---- **/
+const disableVideo = ref(false)
+const videoSrc = '/video5.mp4'
 
-/* --- Helpers --- */
-const igfix = computed(() => {
-  // supports ?igfix, ?igfix=1, ?igfix=true
-  const q = route.query.igfix
-  return q === '' || q === '1' || q === 'true'
-})
-function ua() { return navigator.userAgent || '' }
-function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(ua()) }
-function isKnownMobileBrowser() {
-  const s = ua()
-  const iOSChrome  = /CriOS/i.test(s)
-  const iOSFirefox = /FxiOS/i.test(s)
-  const iOSEdge    = /EdgiOS/i.test(s)
-  const iOSOpera   = /OPiOS/i.test(s)
-  const iOSSafari  = /Safari/i.test(s) && /Version\/\d+/i.test(s) && !(iOSChrome||iOSFirefox||iOSEdge||iOSOpera)
-  const andChrome  = /Chrome\/\d+/i.test(s) && /Android/i.test(s)
-  const andFirefox = /Firefox\/\d+/i.test(s) && /Android/i.test(s)
-  const andEdge    = /EdgA\/\d+/i.test(s)
-  const andSamsung = /SamsungBrowser\/\d+/i.test(s)
-  const andOpera   = /OPR\/\d+/i.test(s)
+function isMobile(ua: string) {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
+}
+
+function isKnownMobileBrowser(ua: string) {
+  // iOS
+  const iOSChrome  = /CriOS/i.test(ua)
+  const iOSFirefox = /FxiOS/i.test(ua)
+  const iOSEdge    = /EdgiOS/i.test(ua)
+  const iOSOpera   = /OPiOS/i.test(ua)
+  const iOSSafari  = /Safari/i.test(ua) && /Version\/\d+/i.test(ua) && !(iOSChrome||iOSFirefox||iOSEdge||iOSOpera)
+  // Android
+  const andChrome  = /Chrome\/\d+/i.test(ua) && /Android/i.test(ua)
+  const andFirefox = /Firefox\/\d+/i.test(ua) && /Android/i.test(ua)
+  const andEdge    = /EdgA\/\d+/i.test(ua)
+  const andSamsung = /SamsungBrowser\/\d+/i.test(ua)
+  const andOpera   = /OPR\/\d+/i.test(ua)
   return iOSChrome || iOSFirefox || iOSEdge || iOSOpera || iOSSafari ||
     andChrome || andFirefox || andEdge || andSamsung || andOpera
 }
-async function tryAutoplayInline(video: HTMLVideoElement) {
-  if (/iPhone|iPad|iPod/i.test(ua())) {
-    video.setAttribute('playsinline', '')
-    video.setAttribute('webkit-playsinline', '')
-  }
-  video.muted = true
-  try {
-    const p = video.play?.()
-    if (p && typeof p.then === 'function') {
-      await Promise.race([
-        p,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200)),
-      ])
-    }
-    return true
-  } catch {
-    return false
+
+if (typeof window !== 'undefined') {
+  // Read query safely on first render
+  const params = new URLSearchParams(window.location.search)
+  const hasFlag = params.has('igfix') && params.get('igfix') !== '0' // supports ?igfix or ?igfix=1/true
+  const ua = navigator.userAgent || ''
+
+  // Rule: only disable when flag is set AND we're on mobile AND browser is not a well-known one
+  // (i.e., likely an in-app/unknown webview such as Instagram).
+  if (hasFlag && isMobile(ua) && !isKnownMobileBrowser(ua)) {
+    disableVideo.value = true
   }
 }
-
-/* --- Logic --- */
-onMounted(async () => {
-  console.log('router.query:', route.query)
-  const v = bgVideo.value
-  if (!v) return
-
-  // Rule:
-  // If the link had ?igfix=1 AND we are on mobile AND the browser is NOT a known mobile browser,
-  // treat it as an in-app/unknown webview → use dark-gray fallback.
-  if (igfix.value && isMobile() && !isKnownMobileBrowser()) {
-    fallback.value = true
-    return
-  }
-
-  // Backstop: if autoplay fails anywhere, fallback gracefully.
-  const ok = await tryAutoplayInline(v)
-  if (!ok) fallback.value = true
-})
 </script>
 
 <style scoped>
-/* keep your existing video styling as-is to avoid desktop pixelation */
+/* Keep whatever original video sizing you had. Do NOT add object-fit if it caused pixelation. */
 
-/* Only active when fallback is on (unknown mobile webview with ?igfix=1, or autoplay failed) */
-.no-video { background-color: #1e1e1e; }  /* dark gray */
-.no-video .body-overlay { display: none !important; }
+/* When disabled, show a dark-gray background */
+.no-video {
+  background-color: #1e1e1e;
+}
+
+/* Hide the video only when disabled (the <video> is not rendered anyway, but this is harmless) */
+.no-video .body-overlay {
+  display: none !important;
+}
 </style>
