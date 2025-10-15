@@ -6,10 +6,12 @@
     <!-- If disabled, this node never renders => no request to /video5.mp4 -->
     <video
       v-if="!disableVideo"
+      ref="bgVideo"
       class="body-overlay"
       autoplay
       muted
       loop
+      playsinline
       preload="auto"
       :src="videoSrc"
     ></video>
@@ -47,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 import NavBar from '@/components/NavBar.vue'
 import ContactBox from '@/sections/ContactBox.vue'
@@ -63,6 +65,7 @@ import BackToTop from '@/components/BackToTop.vue'
 /** ---- Compute once, before first render ---- **/
 const disableVideo = ref(false)
 const videoSrc = '/video5.mp4'
+const bgVideo = ref<HTMLVideoElement | null>(null)
 
 function isMobile(ua: string) {
   return /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
@@ -97,6 +100,22 @@ if (typeof window !== 'undefined') {
     disableVideo.value = true
   }
 }
+
+/** Safari mobile autoplay nudge (only when video is enabled) */
+onMounted(() => {
+  if (disableVideo.value) return
+  const v = bgVideo.value
+  if (!v) return
+
+  // iOS inline hint (ignored elsewhere)
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent || '')) {
+    v.setAttribute('webkit-playsinline', '')
+  }
+
+  // Ensure muted & try to kick autoplay (no-op if already playing)
+  v.muted = true
+  try { v.play?.() } catch {}
+})
 </script>
 
 <style scoped>
