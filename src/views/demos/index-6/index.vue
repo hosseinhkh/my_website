@@ -1,8 +1,8 @@
 <template>
   <NavBar />
 
-  <!-- Adds a fallback class ONLY when IG is detected or autoplay fails -->
-  <div class="main-hero-area5 parallaxie" :class="{ 'ig-no-video': showFallback }">
+  <!-- Fallback only activates when the rule below says so -->
+  <div class="main-hero-area5 parallaxie" :class="{ 'no-video': fallback }">
     <video ref="bgVideo" class="body-overlay" muted autoplay loop>
       <source src="/video5.mp4" type="video/mp4" />
     </video>
@@ -53,18 +53,51 @@ import Contact from '@/sections/Contact.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 
-const showFallback = ref(false)
 const bgVideo = ref<HTMLVideoElement | null>(null)
+const fallback = ref(false)
 
-function isInstagramInApp() {
-  const ua = navigator.userAgent || ''
-  // IG and FB in-app browser tokens per Meta docs
-  return /Instagram|FBAN|FBAV/i.test(ua)
+/** --- Helpers --- **/
+function getUA() { return navigator.userAgent || '' }
+
+function hasIGFixFlag() {
+  try {
+    const sp = new URLSearchParams(window.location.search)
+    return sp.has('igfix') && sp.get('igfix') !== '0'
+  } catch { return false }
 }
 
+function isMobile() {
+  const ua = getUA()
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
+}
+
+/** Detect “well-known” browsers so the flag won’t disable video there */
+function isKnownMobileBrowser() {
+  const ua = getUA()
+
+  // iOS variants
+  const iOSChrome   = /CriOS/i.test(ua)
+  const iOSFirefox  = /FxiOS/i.test(ua)
+  const iOSEdge     = /EdgiOS/i.test(ua)
+  const iOSOpera    = /OPiOS/i.test(ua)
+  // Rough Mobile Safari check: has Safari + Version but not the other iOS browsers
+  const iOSSafari   = /Safari/i.test(ua) && /Version\/\d+/i.test(ua) && !(iOSChrome||iOSFirefox||iOSEdge||iOSOpera)
+
+  // Android variants
+  const andChrome   = /Chrome\/\d+/i.test(ua) && /Android/i.test(ua)
+  const andFirefox  = /Firefox\/\d+/i.test(ua) && /Android/i.test(ua)
+  const andEdge     = /EdgA\/\d+/i.test(ua)
+  const andSamsung  = /SamsungBrowser\/\d+/i.test(ua)
+  const andOpera    = /OPR\/\d+/i.test(ua)
+
+  return iOSChrome || iOSFirefox || iOSEdge || iOSOpera || iOSSafari ||
+    andChrome || andFirefox || andEdge || andSamsung || andOpera
+}
+
+/** Try autoplay inline; if it hangs or fails, we’ll fallback */
 async function tryAutoplayInline(video: HTMLVideoElement) {
-  // iOS inline hint (safe to add at runtime; ignored elsewhere)
-  if (/iPhone|iPad|iPod/i.test(navigator.userAgent || '')) {
+  // iOS inline hints added at runtime only
+  if (/iPhone|iPad|iPod/i.test(getUA())) {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
   }
@@ -72,7 +105,6 @@ async function tryAutoplayInline(video: HTMLVideoElement) {
   try {
     const p = video.play?.()
     if (p && typeof p.then === 'function') {
-      // If IG stalls play() promise, time out and treat as failure
       await Promise.race([
         p,
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200)),
@@ -87,25 +119,28 @@ async function tryAutoplayInline(video: HTMLVideoElement) {
 onMounted(async () => {
   const v = bgVideo.value
   if (!v) return
-  // If UA says IG, fallback immediately (current IG blocks inline/autoplay)
-  if (isInstagramInApp()) {
-    showFallback.value = true
+
+  const flag = hasIGFixFlag()
+  const mobile = isMobile()
+  const known = isKnownMobileBrowser()
+
+  // Rule:
+  // - If the URL has igfix=1 AND we're on mobile AND browser is NOT known → assume IG-like WebView → fallback.
+  // - Else, try to play; if it fails, fallback anyway.
+  if (flag && mobile && !known) {
+    fallback.value = true
     return
   }
-  // Backstop: if autoplay actually fails, also fallback
+
   const ok = await tryAutoplayInline(v)
-  if (!ok) showFallback.value = true
+  if (!ok) fallback.value = true
 })
 </script>
 
 <style scoped>
-/* Do not change any of your existing video sizing to avoid pixelation */
+/* Keep your original video sizing — no changes here to avoid pixelation */
 
-.ig-no-video {
-  background-color: #1e1e1e; /* dark gray fallback for IG */
-}
-
-.ig-no-video .body-overlay {
-  display: none !important; /* hide video only when fallback is active */
-}
+/* Only used when fallback is active (IG-like webviews or autoplay failure) */
+.no-video { background-color: #1e1e1e; }  /* dark gray */
+.no-video .body-overlay { display: none !important; }
 </style>
