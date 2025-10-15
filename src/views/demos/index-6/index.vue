@@ -1,7 +1,7 @@
 <template>
   <NavBar />
 
-  <!-- Fallback only activates when the rule below says so -->
+  <!-- Fallback class toggles ONLY when we decide to hide video -->
   <div class="main-hero-area5 parallaxie" :class="{ 'no-video': fallback }">
     <video ref="bgVideo" class="body-overlay" muted autoplay loop>
       <source src="/video5.mp4" type="video/mp4" />
@@ -40,7 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 import NavBar from '@/components/NavBar.vue'
 import ContactBox from '@/sections/ContactBox.vue'
 import Hero from '@/sections/Hero.vue'
@@ -53,51 +55,35 @@ import Contact from '@/sections/Contact.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 
+const route = useRoute()
 const bgVideo = ref<HTMLVideoElement | null>(null)
 const fallback = ref(false)
 
-/** --- Helpers --- **/
-function getUA() { return navigator.userAgent || '' }
-
-function hasIGFixFlag() {
-  try {
-    const sp = new URLSearchParams(window.location.search)
-    return sp.has('igfix') && sp.get('igfix') !== '0'
-  } catch { return false }
-}
-
-function isMobile() {
-  const ua = getUA()
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
-}
-
-/** Detect “well-known” browsers so the flag won’t disable video there */
+/* --- Helpers --- */
+const igfix = computed(() => {
+  // supports ?igfix, ?igfix=1, ?igfix=true
+  const q = route.query.igfix
+  return q === '' || q === '1' || q === 'true'
+})
+function ua() { return navigator.userAgent || '' }
+function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(ua()) }
 function isKnownMobileBrowser() {
-  const ua = getUA()
-
-  // iOS variants
-  const iOSChrome   = /CriOS/i.test(ua)
-  const iOSFirefox  = /FxiOS/i.test(ua)
-  const iOSEdge     = /EdgiOS/i.test(ua)
-  const iOSOpera    = /OPiOS/i.test(ua)
-  // Rough Mobile Safari check: has Safari + Version but not the other iOS browsers
-  const iOSSafari   = /Safari/i.test(ua) && /Version\/\d+/i.test(ua) && !(iOSChrome||iOSFirefox||iOSEdge||iOSOpera)
-
-  // Android variants
-  const andChrome   = /Chrome\/\d+/i.test(ua) && /Android/i.test(ua)
-  const andFirefox  = /Firefox\/\d+/i.test(ua) && /Android/i.test(ua)
-  const andEdge     = /EdgA\/\d+/i.test(ua)
-  const andSamsung  = /SamsungBrowser\/\d+/i.test(ua)
-  const andOpera    = /OPR\/\d+/i.test(ua)
-
+  const s = ua()
+  const iOSChrome  = /CriOS/i.test(s)
+  const iOSFirefox = /FxiOS/i.test(s)
+  const iOSEdge    = /EdgiOS/i.test(s)
+  const iOSOpera   = /OPiOS/i.test(s)
+  const iOSSafari  = /Safari/i.test(s) && /Version\/\d+/i.test(s) && !(iOSChrome||iOSFirefox||iOSEdge||iOSOpera)
+  const andChrome  = /Chrome\/\d+/i.test(s) && /Android/i.test(s)
+  const andFirefox = /Firefox\/\d+/i.test(s) && /Android/i.test(s)
+  const andEdge    = /EdgA\/\d+/i.test(s)
+  const andSamsung = /SamsungBrowser\/\d+/i.test(s)
+  const andOpera   = /OPR\/\d+/i.test(s)
   return iOSChrome || iOSFirefox || iOSEdge || iOSOpera || iOSSafari ||
     andChrome || andFirefox || andEdge || andSamsung || andOpera
 }
-
-/** Try autoplay inline; if it hangs or fails, we’ll fallback */
 async function tryAutoplayInline(video: HTMLVideoElement) {
-  // iOS inline hints added at runtime only
-  if (/iPhone|iPad|iPod/i.test(getUA())) {
+  if (/iPhone|iPad|iPod/i.test(ua())) {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
   }
@@ -116,31 +102,30 @@ async function tryAutoplayInline(video: HTMLVideoElement) {
   }
 }
 
+/* --- Logic --- */
 onMounted(async () => {
+  console.log('router.query:', route.query)
   const v = bgVideo.value
   if (!v) return
 
-  const flag = hasIGFixFlag()
-  const mobile = isMobile()
-  const known = isKnownMobileBrowser()
-
   // Rule:
-  // - If the URL has igfix=1 AND we're on mobile AND browser is NOT known → assume IG-like WebView → fallback.
-  // - Else, try to play; if it fails, fallback anyway.
-  if (flag && mobile && !known) {
+  // If the link had ?igfix=1 AND we are on mobile AND the browser is NOT a known mobile browser,
+  // treat it as an in-app/unknown webview → use dark-gray fallback.
+  if (igfix.value && isMobile() && !isKnownMobileBrowser()) {
     fallback.value = true
     return
   }
 
+  // Backstop: if autoplay fails anywhere, fallback gracefully.
   const ok = await tryAutoplayInline(v)
   if (!ok) fallback.value = true
 })
 </script>
 
 <style scoped>
-/* Keep your original video sizing — no changes here to avoid pixelation */
+/* keep your existing video styling as-is to avoid desktop pixelation */
 
-/* Only used when fallback is active (IG-like webviews or autoplay failure) */
+/* Only active when fallback is on (unknown mobile webview with ?igfix=1, or autoplay failed) */
 .no-video { background-color: #1e1e1e; }  /* dark gray */
 .no-video .body-overlay { display: none !important; }
 </style>
