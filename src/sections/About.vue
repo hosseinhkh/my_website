@@ -75,9 +75,16 @@
               <div class="space18" />
               <ul>
                 <li v-for="(item, idx) in socialLinks" :key="idx">
-                  <RouterLink :to="item.url" :class="{ 'm-0': socialLinks.length - 1 === idx }">
-                    <img :src="item.image" :alt="item.label || 'link'" />
-                  </RouterLink>
+                  <a
+                    :href="item.url"
+                    target="_blank"
+                    rel="noopener"
+                    :aria-label="item.label"
+                    :title="item.label"
+                    :class="{ 'm-0': socialLinks.length - 1 === idx }"
+                  >
+                    <img :src="item.image" :alt="item.label" />
+                  </a>
                 </li>
               </ul>
             </div>
@@ -127,12 +134,22 @@ import sIcon2 from '@/assets/img/icons/s-icon2.svg' // Google Scholar
 import sIcon3 from '@/assets/img/icons/s-icon3.svg' // Instagram
 import sIcon4 from '@/assets/img/icons/s-icon4.svg' // GitHub
 import sIcon5 from '@/assets/img/icons/s-icon5.svg' // Spotify
+import sIconLinkedIn from '@/assets/img/icons/s-icon4.svg'
+import sIconInstagram from '@/assets/img/icons/s-icon2.svg'
+
+const ICON_SCHOLAR =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 3 1 8l11 5 9-4.09V14h2V8L12 3z"/><path d="M7 12v4c0 2.21 2.91 4 5 4s5-1.79 5-4v-4l-5 2.27L7 12z"/></svg>';
+const ICON_GITHUB =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.1.82-.26.82-.58v-2.2c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.1-.74.08-.73.08-.73 1.22.09 1.86 1.26 1.86 1.26 1.08 1.85 2.83 1.32 3.52 1.01.11-.79.42-1.32.76-1.62-2.66-.3-5.47-1.33-5.47-5.92 0-1.31.47-2.38 1.25-3.22-.13-.31-.54-1.56.12-3.25 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.69.25 2.94.12 3.25.78.84 1.25 1.91 1.25 3.22 0 4.6-2.81 5.61-5.49 5.91.43.37.81 1.1.81 2.22v3.29c0 .32.21.69.83.57A12 12 0 0 0 12 .5z"/></svg>';
+const ICON_SPOTIFY =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm4.44 14.6a.75.75 0 0 1-1.03.25c-2.83-1.73-6.39-2.13-10.57-1.19a.75.75 0 0 1-.33-1.46c4.56-1.04 8.49-.58 11.63 1.33.36.22.47.69.3 1.07zM17 12.6a.9.9 0 0 1-1.23.3c-3.24-1.9-8.18-2.46-12-1.37a.9.9 0 1 1-.48-1.74c4.22-1.15 9.7-.53 13.38 1.62.44.25.59.82.33 1.19zM16.58 10a1.05 1.05 0 0 1-1.43.36c-2.77-1.64-7.01-2.13-10.3-1.19a1.05 1.05 0 1 1-.59-2.02c3.78-1.1 8.49-.55 11.75 1.38.5.29.67.95.37 1.47z"/></svg>';
 
 import home2 from '@/assets/img/icons/home2.svg'
 import home3 from '@/assets/img/icons/home3.svg'
 import home4 from '@/assets/img/icons/home4.svg'
 import home5 from '@/assets/img/icons/home5.svg'
 import { BCol, BRow } from 'bootstrap-vue-next'
+
 
 type SkillType = { image: string; title: string; description: string }
 
@@ -166,10 +183,10 @@ const skills: SkillType[] = [
 
 type SocialLinkType = { label?: string; image: string; url: string }
 const socialLinks: SocialLinkType[] = [
-  { label: 'LinkedIn', image: sIcon1, url: 'https://www.linkedin.com/in/hossein-khalili-658282ab/' },
-  { label: 'Google Scholar', image: sIcon2, url: 'https://scholar.google.com/citations?user=eRdueD0AAAAJ&hl=en' },
-  { label: 'Instagram', image: sIcon3, url: 'https://instagram.com/hosseinhkh_' },
-  { label: 'GitHub', image: sIcon4, url: 'https://github.com/hosseinhkh' },
-  { label: 'Spotify', image: sIcon5, url: 'https://open.spotify.com/user/hosseinhkh' },
+  { label: 'LinkedIn',       image: sIconLinkedIn,  url: 'https://www.linkedin.com/in/hossein-khalili-658282ab/' },
+  { label: 'Google Scholar', image: ICON_SCHOLAR,   url: 'https://scholar.google.com/citations?user=eRdueD0AAAAJ&hl=en' },
+  { label: 'Instagram',      image: sIconInstagram, url: 'https://instagram.com/hosseinhkh_' },
+  { label: 'GitHub',         image: ICON_GITHUB,    url: 'https://github.com/hosseinhkh' },
+  { label: 'Spotify',        image: ICON_SPOTIFY,   url: 'https://open.spotify.com/user/hosseinhkh' },
 ]
 </script>
