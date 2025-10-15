@@ -1,7 +1,8 @@
 <template>
   <NavBar />
 
-  <div class="main-hero-area5 parallaxie">
+  <!-- Only adds a class in IG; everywhere else unchanged -->
+  <div class="main-hero-area5 parallaxie" :class="{ 'ig-fallback': isIG }">
     <video class="body-overlay" muted autoplay loop>
       <source src="/video5.mp4" type="video/mp4" />
     </video>
@@ -41,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import NavBar from '@/components/NavBar.vue'
 import ContactBox from '@/sections/ContactBox.vue'
 import Hero from '@/sections/Hero.vue'
@@ -53,4 +55,41 @@ import Blogs from '@/sections/Blogs.vue'
 import Contact from '@/sections/Contact.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
+
+const isIG = ref(false)
+
+function isInstagramInApp() {
+  const ua = navigator.userAgent || ''
+  // Instagram and Facebook in-app browsers use these tokens
+  return /Instagram|FBAN|FBAV/i.test(ua)
+}
+
+onMounted(() => {
+  isIG.value = isInstagramInApp()
+})
 </script>
+
+<style scoped>
+/* Only affects Instagram in-app browser */
+.ig-fallback .body-overlay {
+  display: none !important;
+}
+
+/* Use a lightweight cover image exported from your video */
+.ig-fallback {
+  background-image: url('/background.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* (Optional, if not already in your global CSS)
+.body-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+*/
+</style>
