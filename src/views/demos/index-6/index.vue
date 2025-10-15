@@ -1,8 +1,8 @@
 <template>
   <NavBar />
 
-  <!-- Unchanged layout; only toggles a class in IG -->
-  <div class="main-hero-area5 parallaxie" :class="{ 'no-inline-video': isIG }">
+  <!-- Adds a fallback class ONLY when IG is detected or autoplay fails -->
+  <div class="main-hero-area5 parallaxie" :class="{ 'ig-no-video': showFallback }">
     <video ref="bgVideo" class="body-overlay" muted autoplay loop>
       <source src="/video5.mp4" type="video/mp4" />
     </video>
@@ -53,28 +53,59 @@ import Contact from '@/sections/Contact.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import { BCol, BContainer, BRow } from 'bootstrap-vue-next'
 
-const isIG = ref(false)
+const showFallback = ref(false)
+const bgVideo = ref<HTMLVideoElement | null>(null)
 
 function isInstagramInApp() {
   const ua = navigator.userAgent || ''
+  // IG and FB in-app browser tokens per Meta docs
   return /Instagram|FBAN|FBAV/i.test(ua)
 }
 
-onMounted(() => {
-  // Only toggle fallback inside Instagram/FB in-app browsers
-  isIG.value = isInstagramInApp()
+async function tryAutoplayInline(video: HTMLVideoElement) {
+  // iOS inline hint (safe to add at runtime; ignored elsewhere)
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent || '')) {
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', '')
+  }
+  video.muted = true
+  try {
+    const p = video.play?.()
+    if (p && typeof p.then === 'function') {
+      // If IG stalls play() promise, time out and treat as failure
+      await Promise.race([
+        p,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1200)),
+      ])
+    }
+    return true
+  } catch {
+    return false
+  }
+}
+
+onMounted(async () => {
+  const v = bgVideo.value
+  if (!v) return
+  // If UA says IG, fallback immediately (current IG blocks inline/autoplay)
+  if (isInstagramInApp()) {
+    showFallback.value = true
+    return
+  }
+  // Backstop: if autoplay actually fails, also fallback
+  const ok = await tryAutoplayInline(v)
+  if (!ok) showFallback.value = true
 })
 </script>
 
 <style scoped>
-/* Do NOT change your video styling here. Keep whatever you had originally.
-   We only control the IG fallback appearance. */
+/* Do not change any of your existing video sizing to avoid pixelation */
 
-.no-inline-video {
-  background-color: #1e1e1e; /* dark gray fallback */
+.ig-no-video {
+  background-color: #1e1e1e; /* dark gray fallback for IG */
 }
 
-.no-inline-video .body-overlay {
-  display: none !important; /* hide video only in IG */
+.ig-no-video .body-overlay {
+  display: none !important; /* hide video only when fallback is active */
 }
 </style>
