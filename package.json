@@ -23,6 +23,7 @@
     "resend": "^6.1.2",
     "vue": "^3.5.13",
     "vue-countup-v3": "^1.4.2",
+    "vue-gtag-next": "^1.14.0",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
